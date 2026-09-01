@@ -37,7 +37,7 @@ export default async function PedidoConfirmacaoPage({ params }: { params: { id: 
   return (
     <div className="space-y-6 py-6 text-center">
       <div>
-        <h2 className="text-xl font-semibold">Pedido enviado!</h2>
+        <h2 className="text-xl font-semibold">Sua lista está pronta</h2>
         <p className="mt-1 text-sm text-neutral-500">Código: {codigo}</p>
       </div>
 
@@ -52,6 +52,16 @@ export default async function PedidoConfirmacaoPage({ params }: { params: { id: 
           <span>Total</span>
           <span>{formatPrice(pedido.valor_total)}</span>
         </div>
+      </div>
+
+      <div className="space-y-2 border border-yellow-200 bg-yellow-50 p-4 text-left text-sm text-yellow-900">
+        <p className="font-medium">Seu pedido ainda não está concluído</p>
+        <ol className="list-decimal space-y-1 pl-4">
+          <li>Envie sua lista pra Bia no WhatsApp (botão abaixo)</li>
+          <li>Ela vai te passar a chave PIX</li>
+          <li>Faça o pagamento e confirme com ela</li>
+          <li>Entrega a combinar</li>
+        </ol>
       </div>
 
       {whatsappUrl ? (
