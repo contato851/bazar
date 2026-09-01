@@ -3,25 +3,43 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Cor do texto em "secundaria bold" — mais suave que preto puro
+     (#000000) para reduzir o contraste agressivo sobre fundo branco. */
+  --text-bold-color: #424040;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Tokens de tipografia da marca:
+   - "Principal" nos títulos h1-h6.
+   - "secundaria bold" em botões e demais títulos/textos em negrito.
+   - "secundaria regular" no restante (peso padrão do body).
+   Aplicado na base para valer em todo o sistema sem precisar anotar cada
+   tela individualmente. A regra de negrito usa :where() (especificidade 0)
+   para que os headings sempre vençam mesmo quando também têm font-semibold/
+   font-bold — do contrário o seletor de classe venceria o de elemento. */
+@layer base {
+  button,
+  .bg-accent {
+    font-family: var(--font-secundaria-bold);
+    color: var(--text-bold-color);
   }
-}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
+  :where(.font-semibold, .font-bold) {
+    font-family: var(--font-secundaria-bold);
+    color: var(--text-bold-color);
+  }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-principal);
+    color: inherit;
+  }
+
+  input[type="radio"],
+  input[type="checkbox"] {
+    accent-color: theme("colors.accent");
   }
 }
