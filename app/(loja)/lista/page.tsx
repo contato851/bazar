@@ -1,20 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
-import { fecharListaAction } from "./actions";
+import { checkDisponibilidadeAction, fecharListaAction } from "./actions";
 
 export default function ListaPage() {
   const { items, removeItem, clear } = useCart();
   const [nomeCliente, setNomeCliente] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [indisponiveis, setIndisponiveis] = useState<Set<string>>(new Set());
   const router = useRouter();
 
+  const ids = items.map((item) => item.id).join(",");
+
+  // Sem reserva de estoque, uma peça pode ser vendida enquanto o cliente
+  // ainda está com ela na lista (carrinho local, sem prazo) — checa contra o
+  // status atual toda vez que a lista muda, pra avisar antes de tentar fechar.
+  useEffect(() => {
+    if (items.length === 0) {
+      setIndisponiveis(new Set());
+      return;
+    }
+
+    let cancelado = false;
+    checkDisponibilidadeAction(items.map((item) => item.id)).then((resultado) => {
+      if (cancelado) return;
+      setIndisponiveis(new Set(resultado.filter((r) => !r.disponivel).map((r) => r.id)));
+    });
+
+    return () => {
+      cancelado = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ids]);
+
   const total = items.reduce((sum, item) => sum + item.preco, 0);
+  const temIndisponiveis = indisponiveis.size > 0;
 
   async function handleFechar() {
     setIsSubmitting(true);
@@ -48,30 +73,50 @@ export default function ListaPage() {
       <h2 className="text-xl font-semibold">Minha lista</h2>
 
       <div className="divide-y border border-neutral-200">
-        {items.map((item) => (
-          <div key={item.id} className="flex items-center gap-3 p-3">
-            <div className="h-16 w-16 shrink-0 bg-neutral-100">
-              {item.foto && <img src={item.foto} alt="" className="h-full w-full object-cover" />}
+        {items.map((item) => {
+          const esgotado = indisponiveis.has(item.id);
+          return (
+            <div key={item.id} className={`flex items-center gap-3 p-3 ${esgotado ? "bg-red-50" : ""}`}>
+              <div className="h-16 w-16 shrink-0 bg-neutral-100">
+                {item.foto && (
+                  <img
+                    src={item.foto}
+                    alt=""
+                    className={`h-full w-full object-cover ${esgotado ? "opacity-50" : ""}`}
+                  />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{item.nome}</p>
+                <p className="text-sm text-neutral-600">{formatPrice(item.preco)}</p>
+                {esgotado && (
+                  <p className="mt-0.5 text-xs font-medium text-red-600">
+                    Essa peça já foi vendida — remova da lista
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => removeItem(item.id)}
+                className="text-sm text-neutral-500 hover:text-neutral-900"
+              >
+                Remover
+              </button>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{item.nome}</p>
-              <p className="text-sm text-neutral-600">{formatPrice(item.preco)}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => removeItem(item.id)}
-              className="text-sm text-neutral-500 hover:text-neutral-900"
-            >
-              Remover
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex items-center justify-between text-lg font-medium">
         <span>Total</span>
         <span>{formatPrice(total)}</span>
       </div>
+
+      {temIndisponiveis && (
+        <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          Uma ou mais peças da sua lista já foram vendidas. Remova-as pra poder fechar a lista.
+        </p>
+      )}
 
       <div>
         <label className="mb-1 block text-sm font-medium text-neutral-700" htmlFor="nome_cliente">
@@ -90,7 +135,7 @@ export default function ListaPage() {
       <button
         type="button"
         onClick={handleFechar}
-        disabled={isSubmitting}
+        disabled={isSubmitting || temIndisponiveis}
         className="w-full bg-accent px-4 py-3 text-sm font-medium text-bold-text hover:opacity-90 disabled:opacity-50"
       >
         {isSubmitting ? "Enviando..." : "Fechar lista"}
