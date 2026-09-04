@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useCallback, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { isHeicFile } from "@/lib/image-compression";
+import { compressImageFile, isHeicFile } from "@/lib/image-compression";
 import { usePhotoCropQueue } from "@/lib/use-photo-crop-queue";
+import { ImageCropModal } from "@/components/image-crop-modal";
 
 type PhotoPreview = { file: File; url: string };
 
@@ -53,6 +54,10 @@ export function PecaForm({
 }: PecaFormProps) {
   const hiddenFotosInputRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<PhotoPreview[]>([]);
+  const [removedUrls, setRemovedUrls] = useState<Set<string>>(new Set());
+  const [recropUrl, setRecropUrl] = useState<string | null>(null);
+  const [recropFile, setRecropFile] = useState<File | null>(null);
+  const [isFetchingRecrop, setIsFetchingRecrop] = useState<string | null>(null);
 
   function syncInputFiles(files: File[]) {
     if (!hiddenFotosInputRef.current) return;
@@ -71,6 +76,52 @@ export function PecaForm({
 
   const { addFiles, isPreparing, preparingProgress, cropModal } =
     usePhotoCropQueue(handleFileReady);
+
+  function toggleRemoveExisting(url: string) {
+    setRemovedUrls((current) => {
+      const updated = new Set(current);
+      if (updated.has(url)) {
+        updated.delete(url);
+      } else {
+        updated.add(url);
+      }
+      return updated;
+    });
+  }
+
+  // Recorte de uma foto já salva: busca o arquivo de volta a partir da URL
+  // pública, abre o mesmo modal de recorte usado no upload, e o resultado
+  // vira uma substituição — a foto antiga entra pra lista de remoção e a
+  // recortada entra como uma foto nova, reaproveitando o fluxo já existente
+  // (remover + adicionar) sem precisar de uma rota de salvamento própria.
+  async function handleRecropClick(url: string) {
+    setIsFetchingRecrop(url);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const fileName = url.split("/").pop() || "foto.jpg";
+      const file = new File([blob], fileName, { type: blob.type || "image/jpeg" });
+      setRecropUrl(url);
+      setRecropFile(file);
+    } finally {
+      setIsFetchingRecrop(null);
+    }
+  }
+
+  async function handleRecropConfirm(cropped: File) {
+    const compressed = await compressImageFile(cropped);
+    if (recropUrl) {
+      setRemovedUrls((current) => new Set(current).add(recropUrl));
+    }
+    handleFileReady(compressed);
+    setRecropUrl(null);
+    setRecropFile(null);
+  }
+
+  function handleRecropCancel() {
+    setRecropUrl(null);
+    setRecropFile(null);
+  }
 
   function handleFilesSelected(event: React.ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? []);
@@ -180,15 +231,40 @@ export function PecaForm({
           <div>
             <p className="mb-2 text-sm font-medium text-neutral-700">Fotos atuais</p>
             <div className="flex flex-wrap gap-3">
-              {existingFotos.map((url) => (
-                <div key={url} className="w-24">
-                  <img src={url} alt="" className="h-24 w-24 border object-cover" />
-                  <label className="mt-1 flex items-center justify-center gap-1 text-xs text-red-600">
-                    <input type="checkbox" name="remove_fotos" value={url} />
-                    Remover
-                  </label>
-                </div>
-              ))}
+              {existingFotos.map((url) => {
+                const marcadaPraRemover = removedUrls.has(url);
+                return (
+                  <div key={url} className="w-24">
+                    <img
+                      src={url}
+                      alt=""
+                      className={`h-24 w-24 border object-cover ${
+                        marcadaPraRemover ? "opacity-40" : ""
+                      }`}
+                    />
+                    <label className="mt-1 flex items-center justify-center gap-1 text-xs text-red-600">
+                      <input
+                        type="checkbox"
+                        name="remove_fotos"
+                        value={url}
+                        checked={marcadaPraRemover}
+                        onChange={() => toggleRemoveExisting(url)}
+                      />
+                      Remover
+                    </label>
+                    {!marcadaPraRemover && (
+                      <button
+                        type="button"
+                        onClick={() => handleRecropClick(url)}
+                        disabled={isFetchingRecrop === url}
+                        className="mt-1 w-full border border-neutral-300 py-0.5 text-xs font-medium hover:bg-neutral-50 disabled:opacity-50"
+                      >
+                        {isFetchingRecrop === url ? "Abrindo..." : "Recortar"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -289,6 +365,13 @@ export function PecaForm({
         )}
       </form>
       {cropModal}
+      {recropFile && (
+        <ImageCropModal
+          file={recropFile}
+          onConfirm={handleRecropConfirm}
+          onCancel={handleRecropCancel}
+        />
+      )}
     </>
   );
 }
