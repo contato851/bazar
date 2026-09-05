@@ -22,7 +22,7 @@ export default async function CatalogoPage() {
             <Link
               key={categoria.id}
               href={`/categoria/${categoria.id}`}
-              className="flex aspect-square items-center justify-center border border-neutral-300 bg-neutral-50 p-4 text-center font-medium hover:bg-neutral-100"
+              className="flex aspect-[3/4] items-center justify-center border border-neutral-300 bg-neutral-50 p-4 text-center font-medium hover:bg-neutral-100"
             >
               {categoria.nome}
             </Link>
