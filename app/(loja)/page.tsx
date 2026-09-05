@@ -29,6 +29,28 @@ export default async function CatalogoPage() {
           ))}
         </div>
       )}
+
+      <div className="relative w-full">
+        <img
+          src="/home/bia-destaque.png"
+          alt="Sua compra em 3 passos: navegue pelas categorias, adicione itens à sua lista, finalize através do WhatsApp"
+          width={1600}
+          height={900}
+          className="h-auto w-full"
+        />
+        <div className="absolute inset-y-0 left-0 flex w-3/5 flex-col justify-center px-2 sm:px-4">
+          <p className="text-xs font-bold uppercase leading-tight sm:text-2xl md:text-3xl">
+            Sua compra em
+            <br />
+            3 passos:
+          </p>
+          <div className="mt-1 space-y-0.5 text-[9px] font-medium leading-tight sm:mt-3 sm:space-y-1 sm:text-base md:text-lg">
+            <p>1 - Navegue pelas categorias</p>
+            <p>2 - Adicione itens à sua lista</p>
+            <p>3 - Finalize através do WhatsApp</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
