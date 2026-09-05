@@ -30,19 +30,13 @@ export default async function CatalogoPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 items-center gap-3">
-        <p className="text-lg font-bold leading-snug sm:text-3xl">
-          Navegue pelas categorias e adicione itens à sua lista. Depois é só
-          finalizar a compra pelo WhatsApp.
-        </p>
-        <img
-          src="/home/destaque.png"
-          alt=""
-          width={900}
-          height={1600}
-          className="w-full object-contain"
-        />
-      </div>
+      <img
+        src="/home/destaque.png"
+        alt="Suas compras em 3 passos: navegue pelas categorias, adicione itens à sua lista, finalize pelo WhatsApp"
+        width={1200}
+        height={675}
+        className="w-full object-contain"
+      />
     </div>
   );
 }
