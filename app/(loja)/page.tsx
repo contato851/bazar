@@ -11,13 +11,13 @@ export default async function CatalogoPage() {
     .order("ordem", { ascending: true });
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-3">
       {!categorias || categorias.length === 0 ? (
         <p className="border border-dashed p-8 text-center text-sm text-neutral-500">
           Nenhuma categoria disponível ainda.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-4">
           {categorias.map((categoria) => (
             <Link
               key={categoria.id}
@@ -30,17 +30,17 @@ export default async function CatalogoPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-2">
-        <p className="text-3xl font-bold leading-snug sm:text-4xl">
+      <div className="grid grid-cols-2 items-center gap-3">
+        <p className="text-lg font-bold leading-snug sm:text-3xl">
           Navegue pelas categorias e adicione itens à sua lista. Depois é só
           finalizar a compra pelo WhatsApp.
         </p>
         <img
-          src="/home/destaque.jpg"
+          src="/home/destaque.png"
           alt=""
           width={900}
-          height={1353}
-          className="w-full object-cover"
+          height={1600}
+          className="w-full object-contain"
         />
       </div>
     </div>
