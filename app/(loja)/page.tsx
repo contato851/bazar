@@ -44,10 +44,17 @@ export default async function CatalogoPage() {
             <br />
             3 passos:
           </p>
-          <div className="mt-1 space-y-0.5 text-[9px] font-medium leading-tight sm:mt-3 sm:space-y-1 sm:text-base md:text-lg">
-            <p>1 - Navegue pelas categorias</p>
-            <p>2 - Adicione itens à sua lista</p>
-            <p>3 - Finalize através do WhatsApp</p>
+          <div className="mt-1 space-y-0.5 text-[9px] font-medium leading-tight sm:mt-3 sm:space-y-1.5 sm:text-base md:text-lg">
+            {[
+              "1 - Navegue pelas categorias",
+              "2 - Adicione itens à sua lista",
+              "3 - Finalize através do WhatsApp",
+            ].map((linha) => (
+              <p key={linha} className="flex items-center gap-1.5 sm:gap-2">
+                <span className="h-1 w-1 shrink-0 rounded-full bg-accent sm:h-2 sm:w-2" />
+                {linha}
+              </p>
+            ))}
           </div>
         </div>
       </div>
