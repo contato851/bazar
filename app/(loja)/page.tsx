@@ -29,14 +29,6 @@ export default async function CatalogoPage() {
           ))}
         </div>
       )}
-
-      <img
-        src="/home/destaque.png"
-        alt="Suas compras em 3 passos: navegue pelas categorias, adicione itens à sua lista, finalize pelo WhatsApp"
-        width={1200}
-        height={675}
-        className="w-full object-contain"
-      />
     </div>
   );
 }
