@@ -26,9 +26,9 @@ export default async function PedidoConfirmacaoPage({ params }: { params: { id: 
   // dela sem precisar digitar nada.
   const linhas = itens.map((item) => `- ${item.nome} — ${formatPrice(item.preco)}`).join("\n");
   const linkPedido = `${siteUrl}/admin/pedido/${pedido.id}`;
-  const mensagem = `Oi Bia! Fechei minha lista no bazar 🛍️\n\nPedido ${codigo}\n${linhas}\n\nTotal: ${formatPrice(
+  const mensagem = `Oi Bia! Fechei minha lista no bazar!\n\nPedido ${codigo}\n${linhas}\n\nTotal: ${formatPrice(
     pedido.valor_total
-  )}\n\nLink do pedido: ${linkPedido}\n\nVou fazer o pix e te aviso!`;
+  )}\n\nLink do pedido: ${linkPedido}\n\nMe passa a chave pix por favor!`;
 
   const whatsappUrl = numero
     ? `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`
