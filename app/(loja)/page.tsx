@@ -14,10 +14,10 @@ export default async function CatalogoPage() {
     <div className="space-y-4">
       <img
         src="/home/bia-destaque.webp"
-        alt="Navegue, faça sua lista, compre. Dúvidas? O WhatsApp está sempre disponível."
+        alt="Navegue, faça sua lista, compre. São 3 passos simples para garantir seus novos looks."
         width={1400}
         height={1200}
-        className="h-auto w-full rounded-2xl"
+        className="h-auto w-full rounded-[1rem]"
       />
 
       {!categorias || categorias.length === 0 ? (
@@ -30,7 +30,7 @@ export default async function CatalogoPage() {
             <Link
               key={categoria.id}
               href={`/categoria/${categoria.id}`}
-              className="flex aspect-square items-center justify-center rounded-2xl border border-neutral-300 bg-neutral-50 p-4 text-center text-base font-semibold hover:bg-neutral-100 sm:text-xl"
+              className="flex aspect-square items-center justify-center rounded-[1rem] border border-neutral-300 bg-neutral-50 p-4 text-center text-base font-semibold hover:bg-neutral-100 sm:text-xl"
             >
               {categoria.nome}
             </Link>
