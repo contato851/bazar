@@ -55,12 +55,11 @@ export default async function PedidoConfirmacaoPage({ params }: { params: { id: 
       </div>
 
       <div className="space-y-2 border border-yellow-200 bg-yellow-50 p-4 text-left text-sm text-yellow-900">
-        <p className="font-medium">Seu pedido ainda não está concluído</p>
+        <p className="font-medium">Hello!! Seu pedido ainda não está concluído.</p>
         <ol className="list-decimal space-y-1 pl-4">
-          <li>Envie sua lista pra Bia no WhatsApp (botão abaixo)</li>
-          <li>Ela vai te passar a chave PIX</li>
-          <li>Faça o pagamento e confirme com ela</li>
-          <li>Entrega a combinar</li>
+          <li>Me envia sua lista no WhatsApp (botão abaixo)</li>
+          <li>Vou te passar o pix para pagamento.</li>
+          <li>Com o pagamento confirmado a gente combina a entrega.</li>
         </ol>
       </div>
 
