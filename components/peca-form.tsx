@@ -154,6 +154,15 @@ export function PecaForm({
     <>
       <form
         action={action}
+        onKeyDown={(event) => {
+          // Enter num campo de uma linha (nome, preço) não deve salvar o
+          // formulário de repente no meio da edição — só o botão de submit
+          // deve disparar isso. Textarea (descrição) mantém o Enter normal,
+          // pra continuar permitindo quebra de linha.
+          if (event.key === "Enter" && event.target instanceof HTMLElement && event.target.tagName !== "TEXTAREA") {
+            event.preventDefault();
+          }
+        }}
         className="max-w-2xl space-y-5 border border-neutral-200 bg-white p-6"
       >
         <div>
