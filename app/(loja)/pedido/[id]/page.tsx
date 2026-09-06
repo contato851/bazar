@@ -61,6 +61,11 @@ export default async function PedidoConfirmacaoPage({ params }: { params: { id: 
           <li>Vou te passar o pix para pagamento.</li>
           <li>Com o pagamento confirmado a gente combina a entrega.</li>
         </ol>
+        <p className="text-right">
+          Beijos,
+          <br />
+          Bia.
+        </p>
       </div>
 
       {whatsappUrl ? (
