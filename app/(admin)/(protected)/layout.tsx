@@ -36,6 +36,9 @@ export default async function AdminLayout({
             <Link href="/admin/categorias" className="hover:text-neutral-900">
               Categorias
             </Link>
+            <Link href="/admin/relatorios" className="hover:text-neutral-900">
+              Relatórios
+            </Link>
             <form action={signOutAdminAction}>
               <button type="submit" className="hover:text-neutral-900">
                 Sair
