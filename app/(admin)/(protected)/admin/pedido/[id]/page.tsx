@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice, shortOrderCode } from "@/lib/format";
 import { limparItensVendidosDoPedido, type ItemPedido } from "@/lib/pedidos";
 import { cancelarPedidoAction, confirmarPedidoAction, removerItemPedidoAction } from "../actions";
+import { CompartilharPedidoButton } from "@/components/compartilhar-pedido-button";
 
 export const dynamic = "force-dynamic";
 
@@ -114,6 +115,16 @@ export default async function AdminPedidoPage({ params }: { params: { id: string
             </button>
           </form>
         </div>
+      )}
+
+      {pedido.status === "confirmado" && (
+        <CompartilharPedidoButton
+          codigo={shortOrderCode(pedido.id)}
+          nomeCliente={pedido.nome_cliente}
+          itens={itens}
+          itensRemovidos={itensRemovidos}
+          valorTotal={pedido.valor_total}
+        />
       )}
 
       {itensRemovidos.length > 0 && (
