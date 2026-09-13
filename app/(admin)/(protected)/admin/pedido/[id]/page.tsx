@@ -1,11 +1,10 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice, shortOrderCode } from "@/lib/format";
-import { cancelarPedidoAction, confirmarPedidoAction } from "../actions";
+import { limparItensVendidosDoPedido, type ItemPedido } from "@/lib/pedidos";
+import { cancelarPedidoAction, confirmarPedidoAction, removerItemPedidoAction } from "../actions";
 
 export const dynamic = "force-dynamic";
-
-type ItemPedido = { id: string; nome: string; preco: number };
 
 const STATUS_LABELS: Record<string, string> = {
   pendente: "Pendente",
@@ -20,16 +19,14 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default async function AdminPedidoPage({ params }: { params: { id: string } }) {
-  const supabase = createAdminClient();
-  const { data: pedido } = await supabase
-    .from("pedidos")
-    .select("id, itens, valor_total, nome_cliente, status, created_at")
-    .eq("id", params.id)
-    .single();
-
+  // Antes de mostrar qualquer coisa, tira do pedido os itens cuja peça já
+  // foi vendida em outro lugar enquanto este pedido esperava confirmação.
+  const pedido = await limparItensVendidosDoPedido(params.id);
   if (!pedido) notFound();
 
+  const supabase = createAdminClient();
   const itens = pedido.itens as ItemPedido[];
+  const itensRemovidos = (pedido.itens_removidos as ItemPedido[]) ?? [];
   const pecaIds = itens.map((item) => item.id);
 
   const { data: pecasAtuais } = await supabase
@@ -55,14 +52,15 @@ export default async function AdminPedidoPage({ params }: { params: { id: string
       </div>
 
       <div className="divide-y border border-neutral-200">
+        {itens.length === 0 && (
+          <p className="p-3 text-sm text-neutral-500">Nenhum item disponível neste pedido.</p>
+        )}
         {itens.map((item) => {
           const pecaAtual = pecasPorId.get(item.id);
-          // Os alertas de conflito só fazem sentido enquanto o pedido ainda
-          // está pendente — servem pra Bia decidir antes de confirmar. Depois
-          // de confirmado, a própria peça está "vendida" por causa DESTE
-          // pedido, então reexibir o aviso ficaria descrevendo a ação que
-          // acabou de acontecer como se fosse um problema.
-          const jaVendida = pedido.status === "pendente" && pecaAtual?.status === "vendido";
+          // Peça já vendida some sozinha antes de chegar aqui (ver
+          // limparItensVendidosDoPedido) — o único conflito que ainda
+          // aparece pra decisão da Bia é a peça estar numa lista pendente
+          // mais recente de outro cliente.
           const emOutroPedido =
             pedido.status === "pendente" &&
             Boolean(pecaAtual?.pedido_id) &&
@@ -74,15 +72,17 @@ export default async function AdminPedidoPage({ params }: { params: { id: string
                 <span>{item.nome}</span>
                 <span>{formatPrice(item.preco)}</span>
               </div>
-              {jaVendida && (
-                <p className="mt-1 bg-yellow-50 px-2 py-1 text-xs text-yellow-800">
-                  ⚠ Essa peça já foi vendida em outro pedido confirmado.
-                </p>
-              )}
-              {!jaVendida && emOutroPedido && (
-                <p className="mt-1 bg-yellow-50 px-2 py-1 text-xs text-yellow-800">
-                  ⚠ Essa peça também está numa lista pendente de outro cliente.
-                </p>
+              {emOutroPedido && (
+                <div className="mt-1 flex items-center justify-between gap-2 bg-yellow-50 px-2 py-1 text-xs text-yellow-800">
+                  <span>⚠ Essa peça também está numa lista pendente de outro cliente.</span>
+                  <form action={removerItemPedidoAction}>
+                    <input type="hidden" name="pedidoId" value={pedido.id} />
+                    <input type="hidden" name="itemId" value={item.id} />
+                    <button type="submit" className="shrink-0 whitespace-nowrap underline hover:no-underline">
+                      Excluir da lista
+                    </button>
+                  </form>
+                </div>
               )}
             </div>
           );
@@ -113,6 +113,18 @@ export default async function AdminPedidoPage({ params }: { params: { id: string
               Cancelar pedido
             </button>
           </form>
+        </div>
+      )}
+
+      {itensRemovidos.length > 0 && (
+        <div className="space-y-1 pt-2 text-xs text-neutral-400">
+          <p>Itens indisponíveis:</p>
+          {itensRemovidos.map((item, index) => (
+            <div key={`${item.id}-${index}`} className="flex justify-between gap-2">
+              <span>{item.nome}</span>
+              <span>{formatPrice(item.preco)}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
