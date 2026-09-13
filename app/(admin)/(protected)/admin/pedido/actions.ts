@@ -6,6 +6,28 @@ import { createAdminClient } from "@/lib/supabase/admin";
 type ItemPedido = { id: string };
 type ItemPedidoCompleto = { id: string; nome: string; preco: number };
 
+/**
+ * Nome do cliente virou obrigatório ao fechar a lista, mas pedidos antigos
+ * podem ter ficado sem (ou a Bia quer corrigir um erro de digitação) — esta
+ * ação deixa ela editar o nome depois, direto na tela do pedido.
+ */
+export async function atualizarNomeClienteAction(formData: FormData) {
+  const pedidoId = formData.get("pedidoId")?.toString();
+  const nomeCliente = formData.get("nomeCliente")?.toString().trim();
+  if (!pedidoId || !nomeCliente) return;
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("pedidos")
+    .update({ nome_cliente: nomeCliente })
+    .eq("id", pedidoId);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/admin/pedido/${pedidoId}`);
+  revalidatePath("/admin/relatorios");
+}
+
 export async function confirmarPedidoAction(formData: FormData) {
   const id = formData.get("id")?.toString();
   if (!id) return;

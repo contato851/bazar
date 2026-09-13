@@ -2,7 +2,12 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatPrice, shortOrderCode } from "@/lib/format";
 import { limparItensVendidosDoPedido, type ItemPedido } from "@/lib/pedidos";
-import { cancelarPedidoAction, confirmarPedidoAction, removerItemPedidoAction } from "../actions";
+import {
+  atualizarNomeClienteAction,
+  cancelarPedidoAction,
+  confirmarPedidoAction,
+  removerItemPedidoAction,
+} from "../actions";
 import { CompartilharPedidoButton } from "@/components/compartilhar-pedido-button";
 
 export const dynamic = "force-dynamic";
@@ -41,10 +46,22 @@ export default async function AdminPedidoPage({ params }: { params: { id: string
     <div className="max-w-xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Pedido {shortOrderCode(pedido.id)}</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          {pedido.nome_cliente ? `${pedido.nome_cliente} · ` : ""}
-          {new Date(pedido.created_at).toLocaleString("pt-BR")}
-        </p>
+        <form action={atualizarNomeClienteAction} className="mt-1 flex flex-wrap items-center gap-2">
+          <input type="hidden" name="pedidoId" value={pedido.id} />
+          <input
+            type="text"
+            name="nomeCliente"
+            defaultValue={pedido.nome_cliente ?? ""}
+            placeholder="Nome da cliente"
+            className="border-b border-neutral-300 bg-transparent py-0.5 text-sm text-neutral-700 focus:border-neutral-900 focus:outline-none"
+          />
+          <button type="submit" className="text-xs text-neutral-500 underline hover:text-neutral-900">
+            Salvar nome
+          </button>
+          <span className="text-sm text-neutral-500">
+            · {new Date(pedido.created_at).toLocaleString("pt-BR")}
+          </span>
+        </form>
         <span
           className={`mt-2 inline-block px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[pedido.status]}`}
         >

@@ -42,9 +42,13 @@ export async function checkDisponibilidadeAction(ids: string[]) {
  * mas o tempo entre carregar a tela e clicar em "Fechar lista" ainda dá
  * margem pra uma venda acontecer, então a trava final fica aqui no servidor.
  */
-export async function fecharListaAction(itens: ItemPedido[], nomeCliente?: string) {
+export async function fecharListaAction(itens: ItemPedido[], nomeCliente: string) {
   if (itens.length === 0) {
     throw new Error("A lista está vazia");
+  }
+
+  if (!nomeCliente?.trim()) {
+    throw new Error("Informe seu nome para fechar a lista");
   }
 
   const supabase = createAdminClient();
@@ -74,7 +78,7 @@ export async function fecharListaAction(itens: ItemPedido[], nomeCliente?: strin
     .insert({
       itens,
       valor_total: valorTotal,
-      nome_cliente: nomeCliente?.trim() || null,
+      nome_cliente: nomeCliente.trim(),
     })
     .select("id")
     .single();

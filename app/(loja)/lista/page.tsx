@@ -42,6 +42,11 @@ export default function ListaPage() {
   const temIndisponiveis = indisponiveis.size > 0;
 
   async function handleFechar() {
+    if (!nomeCliente.trim()) {
+      setError("Informe seu nome para fechar a lista");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     try {
@@ -120,10 +125,11 @@ export default function ListaPage() {
 
       <div>
         <label className="mb-1 block text-sm font-medium text-neutral-700" htmlFor="nome_cliente">
-          Seu nome (opcional)
+          Seu nome
         </label>
         <input
           id="nome_cliente"
+          required
           value={nomeCliente}
           onChange={(event) => setNomeCliente(event.target.value)}
           className="w-full border border-neutral-300 px-3 py-2 text-sm focus:border-accent focus:outline-none"
